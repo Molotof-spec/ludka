@@ -402,7 +402,25 @@ async def admin_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         gid=int(q.data.split(":")[1])
         con=db(); con.execute("UPDATE gifts SET status='done' WHERE id=?", (gid,)); con.commit(); con.close()
         await q.message.reply_text(f"✅ Заявка #{gid} закрыта.")
+async def give_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if ADMIN_ID and update.effective_user.id != ADMIN_ID:
+        return
 
+    if len(context.args) < 2:
+        await update.message.reply_text("Используй: /give USER_ID AMOUNT")
+        return
+
+    target = context.args[0]
+    amount = int(context.args[1])
+
+    if target == "me":
+        target = str(update.effective_user.id)
+
+    add_coins(str(target), amount)
+
+    await update.message.reply_text(
+        f"✅ Выдано {amount} очков пользователю {target}"
+    )
 def run_flask():
     print("🌐 FLASK SERVER STARTING...", flush=True)
     app.run(
@@ -428,6 +446,7 @@ def main():
     application.add_handler(CommandHandler("add", add_balance))
     application.add_handler(CommandHandler("admin", admin_panel))
     application.add_handler(CallbackQueryHandler(admin_callback))
+    application.add_handler(CommandHandler("give", give_points))
     application.add_handler(CommandHandler("myid", myid))
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("gifts", admin_gifts))
