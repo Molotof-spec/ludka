@@ -94,7 +94,87 @@ def get_user_id():
     if user_id: return user_id, data
     if DEV_MODE: return str(data.get("dev_user_id","dev_user")), data
     return None, data
+async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if ADMIN_ID and update.effective_user.id != ADMIN_ID:
+        return
 
+    keyboard = [
+        [InlineKeyboardButton("📊 Статистика", callback_data="admin_stats")],
+        [InlineKeyboardButton("🎁 Заявки подарков", callback_data="admin_gifts")],
+        [InlineKeyboardButton("🏆 Топ игроков", callback_data="admin_top")],
+    ]
+
+    await update.message.reply_text(
+        "👑 Админ-панель ZeroLuck",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+
+async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    q = update.callback_query
+    await q.answer()
+
+    if ADMIN_ID and q.from_user.id != ADMIN_ID:
+        return
+
+    con = db()
+
+    if q.data == "admin_stats":
+        users = con.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
+        gifts = con.execute("SELECT COUNT(*) AS c FROM gifts WHERE status='pending'").fetchone()["c"]
+        total_coins = con.execute("SELECT SUM(coins) AS s FROM users").fetchone()["s"] or 0
+
+        await q.message.reply_text(
+            f"📊 Статистика\n\n"
+            f"👥 Игроков: {users}\n"
+            f"🎁 Заявок: {gifts}\n"
+            f"💰 Всего очков: {total_coins}"
+        )
+
+    elif q.data == "admin_gifts":
+        rows = con.execute(
+            "SELECT * FROM gifts WHERE status='pending' ORDER BY id DESC LIMIT 20"
+        ).fetchall()
+
+        if not rows:
+            await q.message.reply_text("🎁 Заявок нет")
+        else:
+            text = "🎁 Заявки на подарки:\n\n"
+            buttons = []
+
+            for r in rows:
+                text += f"#{r['id']} | user {r['user_id']} | {r['cost']} очков\n"
+                buttons.append([
+                    InlineKeyboardButton(
+                        f"✅ Закрыть #{r['id']}",
+                        callback_data=f"gift_done:{r['id']}"
+                    )
+                ])
+
+            await q.message.reply_text(
+                text,
+                reply_markup=InlineKeyboardMarkup(buttons)
+            )
+
+    elif q.data == "admin_top":
+        rows = con.execute(
+            "SELECT user_id, coins, wins FROM users ORDER BY coins DESC LIMIT 10"
+        ).fetchall()
+
+        text = "🏆 Топ игроков:\n\n"
+        for i, r in enumerate(rows, 1):
+            text += f"{i}. {r['user_id']} — {r['coins']} 💰 | {r['wins']} 🏆\n"
+
+        await q.message.reply_text(text)
+
+    elif q.data.startswith("gift_done:"):
+        gift_id = int(q.data.split(":")[1])
+        con.execute("UPDATE gifts SET status='done' WHERE id=?", (gift_id,))
+        con.commit()
+
+        await q.message.reply_text(f"✅ Заявка #{gift_id} закрыта")
+
+    con.close()
 def ok(payload): return jsonify({"ok":True, **payload})
 def err(msg, code=400): return jsonify({"ok":False,"error":msg}), code
 
@@ -337,6 +417,8 @@ def main():
 
     application = ApplicationBuilder().token(TOKEN).build()
     application.add_handler(CommandHandler("add", add_balance))
+    application.add_handler(CommandHandler("admin", admin_panel))
+    application.add_handler(CallbackQueryHandler(admin_callback))
     application.add_handler(CommandHandler("myid", myid))
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("gifts", admin_gifts))
