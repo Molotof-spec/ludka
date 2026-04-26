@@ -299,8 +299,14 @@ def run_flask():
     app.run(host="0.0.0.0", port=PORT)
 
 def main():
-    if not TOKEN:
-        raise RuntimeError("Set TELEGRAM_TOKEN env var")
+    # запускаем Flask
+    threading.Thread(target=run_flask).start()
+
+    # запускаем бота
+    application = ApplicationBuilder().token(TOKEN).build()
+
+    print("🚀 Bot starting...")
+    application.run_polling()
     init_db()
     threading.Thread(target=run_flask).start()
     application=ApplicationBuilder().token(TOKEN).build()
