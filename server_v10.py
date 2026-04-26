@@ -119,7 +119,7 @@ async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     con = db()
-    elif q.data == "admin_add_info":
+    if q.data == "admin_add_info":
         await q.message.reply_text(
             "💰 Чтобы выдать очки, напиши:\n\n"
             "/give USER_ID AMOUNT\n\n"
@@ -128,7 +128,7 @@ async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Себе:\n"
             "/give me 10000"
         )
-    if q.data == "admin_stats":
+    elif q.data == "admin_stats":
         users = con.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
         gifts = con.execute("SELECT COUNT(*) AS c FROM gifts WHERE status='pending'").fetchone()["c"]
         total_coins = con.execute("SELECT SUM(coins) AS s FROM users").fetchone()["s"] or 0
