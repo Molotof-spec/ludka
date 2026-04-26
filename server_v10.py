@@ -12,7 +12,12 @@ DB_PATH = os.getenv("DB_PATH", "zeroluck.db")
 DEV_MODE = os.getenv("DEV_MODE", "1") == "1"
 
 app = Flask(__name__)
-
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
 def db():
     con = sqlite3.connect(DB_PATH, check_same_thread=False)
     con.row_factory = sqlite3.Row
