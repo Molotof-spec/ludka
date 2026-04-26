@@ -328,14 +328,14 @@ def main():
         raise RuntimeError("TELEGRAM_TOKEN не найден")
 
     init_db()
-    application.add_handler(CommandHandler("add", add_balance))
+    
     # Flask в отдельный поток
     threading.Thread(target=run_flask, daemon=True).start()
 
     print("🤖 BOT STARTING...", flush=True)
 
     application = ApplicationBuilder().token(TOKEN).build()
-
+    application.add_handler(CommandHandler("add", add_balance))
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("gifts", admin_gifts))
     application.add_handler(CallbackQueryHandler(admin_button))
