@@ -42,7 +42,20 @@ def ensure_user(user_id):
 def user_public(user_id):
     u=ensure_user(user_id)
     return {"id":str(user_id),"coins":u["coins"],"wins":u["wins"],"games":u["games"],"bonus_total":u["bonus_total"],"level":u["coins"]//1000+1}
+async def add_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if ADMIN_ID and update.effective_user.id != ADMIN_ID:
+        return
 
+    if len(context.args) < 1:
+        await update.message.reply_text("Используй: /add 10000")
+        return
+
+    amount = int(context.args[0])
+    user_id = str(update.effective_user.id)
+
+    add_coins(user_id, amount)
+
+    await update.message.reply_text(f"✅ Начислено +{amount} очков")
 def add_coins(user_id, amount):
     ensure_user(user_id); con=db()
     con.execute("UPDATE users SET coins=coins+? WHERE user_id=?", (amount,str(user_id)))
@@ -315,7 +328,7 @@ def main():
         raise RuntimeError("TELEGRAM_TOKEN не найден")
 
     init_db()
-
+    application.add_handler(CommandHandler("add", add_balance))
     # Flask в отдельный поток
     threading.Thread(target=run_flask, daemon=True).start()
 
