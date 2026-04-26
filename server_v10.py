@@ -335,7 +335,7 @@ def main():
     print("🤖 BOT STARTING...", flush=True)
 
     application = ApplicationBuilder().token(TOKEN).build()
-    application.add_handler(CommandHandler("add", add_balance))
+    application.add_handler(CommandHandler("myid", myid))
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("gifts", admin_gifts))
     application.add_handler(CallbackQueryHandler(admin_button))
