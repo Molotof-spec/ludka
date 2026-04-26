@@ -295,8 +295,26 @@ async def admin_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         con=db(); con.execute("UPDATE gifts SET status='done' WHERE id=?", (gid,)); con.commit(); con.close()
         await q.message.reply_text(f"✅ Заявка #{gid} закрыта.")
 
-def run_bot():
-    print("🤖 BOT THREAD STARTING...", flush=True)
+def run_flask():
+    print("🌐 FLASK SERVER STARTING...", flush=True)
+    app.run(
+        host="0.0.0.0",
+        port=PORT,
+        debug=False,
+        use_reloader=False
+    )
+
+
+def main():
+    if not TOKEN:
+        raise RuntimeError("TELEGRAM_TOKEN не найден")
+
+    init_db()
+
+    # Flask в отдельный поток
+    threading.Thread(target=run_flask, daemon=True).start()
+
+    print("🤖 BOT STARTING...", flush=True)
 
     application = ApplicationBuilder().token(TOKEN).build()
 
@@ -308,28 +326,13 @@ def run_bot():
     application.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, paid))
 
     print("✅ BOT POLLING STARTED", flush=True)
-    application.run_polling(close_loop=False)
+
+    # Бот в главном потоке
+    application.run_polling()
 
 
-def main():
-    if not TOKEN:
-        raise RuntimeError("TELEGRAM_TOKEN не найден")
-
-    init_db()
-
-    # бот запускаем отдельным потоком
-    threading.Thread(target=run_bot, daemon=True).start()
-
-    print("🌐 FLASK SERVER STARTING...", flush=True)
-
-    # Flask держит Render живым
-    app.run(
-        host="0.0.0.0",
-        port=PORT,
-        debug=False,
-        use_reloader=False
-    )
-
+if name == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
