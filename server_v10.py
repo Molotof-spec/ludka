@@ -302,7 +302,7 @@ def main():
     if not TOKEN:
         raise RuntimeError("Set TELEGRAM_TOKEN env var")
     init_db()
-    threading.Thread(target=run_flask, daemon=True).start()
+    threading.Thread(target=run_flask).start()
     application=ApplicationBuilder().token(TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("gifts", admin_gifts))
@@ -311,7 +311,7 @@ def main():
     application.add_handler(PreCheckoutQueryHandler(precheckout))
     application.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, paid))
     print("ZeroLuck v10 started")
-    application.run_polling()
+    application.run_polling(close_loop=False)
 
 if __name__=="__main__":
     main()
