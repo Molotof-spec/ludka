@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZeroLuck v10</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#581c87,#020617 68%);color:white;text-align:center;padding:14px}
+.app{max-width:450px;margin:auto}
+.card{background:rgba(15,23,42,.96);border:1px solid rgba(255,255,255,.11);border-radius:28px;padding:20px;box-shadow:0 0 42px rgba(168,85,247,.42)}
+.logo{font-size:58px;margin-bottom:4px}
+h1{margin:4px 0;font-size:38px}
+h2{margin:10px 0}
+.subtitle{margin:6px 0 14px;color:#cbd5e1;font-size:14px}
+.badge{display:inline-block;padding:7px 14px;border-radius:99px;background:rgba(250,204,21,.14);color:#facc15;font-weight:800;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin:16px 0}
+.stat{background:rgba(255,255,255,.09);border-radius:17px;padding:12px 6px;font-size:13px}
+.stat b{display:block;color:#facc15;font-size:23px;margin-top:4px}
+.progress{height:14px;background:#334155;border-radius:99px;overflow:hidden;margin:12px 0 18px}
+#xpBar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#facc15,#ef4444);transition:.3s}
+button{width:100%;padding:16px;margin:7px 0;border:none;border-radius:18px;color:white;font-size:17px;font-weight:900;cursor:pointer}
+button:active{transform:scale(.96)}
+.blue{background:linear-gradient(135deg,#3b82f6,#06b6d4)}
+.green{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.red{background:linear-gradient(135deg,#ef4444,#f97316)}
+.gold{background:linear-gradient(135deg,#facc15,#f59e0b);color:#111827}
+.gray{background:linear-gradient(135deg,#64748b,#475569)}
+.purple{background:linear-gradient(135deg,#8b5cf6,#d946ef)}
+.game{display:none}
+.result{min-height:38px;margin-top:14px;font-size:20px;font-weight:900}
+input,select{width:100%;padding:16px;margin:10px 0;border:none;border-radius:18px;font-size:22px;font-weight:800;text-align:center;background:#f8fafc;color:#111827}
+.rocket-box{margin:18px 0;padding:18px;border-radius:24px;background:radial-gradient(circle,#1e293b,#020617);box-shadow:0 0 26px rgba(34,197,94,.25)}
+.multiplier{font-size:62px;font-weight:900;color:#22c55e;text-shadow:0 0 22px rgba(34,197,94,.9);margin:18px 0}
+.rocket-line{height:15px;width:100%;background:#111827;border-radius:99px;overflow:hidden}
+#rocketBar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#facc15,#ef4444);transition:width .08s linear}
+.rocket-note{font-size:12px;color:#94a3b8;margin-top:8px}
+.history{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+.hist{padding:6px 10px;border-radius:99px;background:#1f2937;color:#cbd5e1;font-size:13px;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
+.grid button{height:54px;padding:0;margin:0;font-size:22px}
+.leader-row{display:flex;justify-content:space-between;background:#1f2937;padding:10px;border-radius:14px;margin:7px 0}
+.footer{color:#94a3b8;font-size:13px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="app"><div class="card">
+<div id="menu">
+  <div class="logo">🎲</div>
+  <h1>ZeroLuck</h1>
+  <div class="badge">SERVER v10</div>
+  <p class="subtitle">Серверный баланс, Stars, подарки, рейтинг</p>
+  <div class="stats">
+    <div class="stat">💰 Очки <b id="coins">0</b></div>
+    <div class="stat">⭐ Уровень <b id="level">1</b></div>
+    <div class="stat">🏆 Победы <b id="wins">0</b></div>
+  </div>
+  <div class="progress"><div id="xpBar"></div></div>
+  <button id="openRocket" class="blue" type="button">🚀 Ракета PRO</button>
+  <button id="openMines" class="red" type="button">💣 Мины PRO</button>
+  <button id="dailyBtn" class="green" type="button">🎁 Ежедневный бонус</button>
+  <button id="shopBtn" class="gold" type="button">⭐ Магазин Stars</button>
+  <button id="giftBtn" class="purple" type="button">🎁 Получить подарок</button>
+  <button id="leaderBtn" class="blue" type="button">🏆 Рейтинг</button>
+  <button id="profileBtn" class="gray" type="button">📈 Профиль</button>
+</div>
+
+<div id="rocket" class="game">
+  <h2>🚀 Ракета PRO</h2>
+  <div class="rocket-box"><div id="rocketMulti" class="multiplier">x1.00</div><div class="rocket-line"><div id="rocketBar"></div></div><div class="rocket-note">Краш считает сервер. Полоска — только эффект.</div></div>
+  <input id="rocketBet" type="number" value="100" min="1" placeholder="Ставка">
+  <input id="autoCash" type="number" value="" min="1" placeholder="Авто-забрать на x">
+  <button id="startRocket" class="green" type="button">🚀 Старт</button>
+  <button id="cashRocket" class="gold" type="button">💰 Забрать</button>
+  <button class="backBtn red" type="button">Назад</button>
+  <div id="rocketRes" class="result">Введи ставку и нажми старт</div>
+  <p class="subtitle">История множителей</p><div id="rocketHistory" class="history"></div>
+</div>
+
+<div id="mines" class="game">
+  <h2>💣 Мины PRO</h2>
+  <input id="mineBet" type="number" value="100" min="1" placeholder="Ставка">
+  <select id="mineCount"><option value="3">3 мины — легче</option><option value="5" selected>5 мин — норма</option><option value="7">7 мин — риск</option></select>
+  <div id="mineGrid" class="grid"></div>
+  <button id="startMines" class="green" type="button">Старт</button>
+  <button id="cashMines" class="gold" type="button">Забрать</button>
+  <button class="backBtn red" type="button">Назад</button>
+  <div id="mineRes" class="result">Выбери ставку и количество мин</div>
+</div>
+
+<div id="shop" class="game">
+  <h2>⭐ Магазин Stars</h2>
+  <button id="buy1" class="blue" type="button">⭐ 1 Star → 1000 очков</button>
+  <button id="buy5" class="blue" type="button">⭐⭐⭐⭐⭐ 5 Stars → 7000 очков</button>
+  <button id="buy10" class="blue" type="button">⭐ 10 Stars → 16000 очков</button>
+  <button class="backBtn red" type="button">Назад</button>
+  <div id="shopRes" class="result">Выбери покупку</div>
+</div>
+
+<div id="gift" class="game">
+  <h2>🎁 Подарки</h2>
+  <p class="subtitle">5000 очков = заявка админу</p>
+  <button id="giftRequest" class="gold" type="button">🎁 Создать заявку за 5000</button>
+  <button class="backBtn red" type="button">Назад</button>
+  <div id="giftRes" class="result">Заявки выдаются вручную админом</div>
+</div>
+
+<div id="leader" class="game">
+  <h2>🏆 Рейтинг</h2>
+  <div id="leaderList"></div>
+  <button class="backBtn red" type="button">Назад</button>
+</div>
+
+<div id="profile" class="game">
+  <h2>📈 Профиль</h2>
+  <div id="profileText" class="result"></div>
+  <button class="backBtn blue" type="button">Назад</button>
+</div>
+<div class="footer">ZeroLuck для Telegram Mini Apps</div>
+</div></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const API_BASE = ""; // если GitHub Pages + Render: "https://your-service.onrender.com"
+  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tg) tg.expand();
+
+  let me = {coins:0,wins:0,level:1,games:0,bonus_total:0};
+  let rocketSession = null, rocketTimer = null, rocketMult = 1, visualProgress = 0;
+  let mineSession = null;
+  let rocketHistory = JSON.parse(localStorage.getItem("zl_history") || "[]");
+
+  const screens = ["menu","rocket","mines","shop","gift","profile","leader"];
+  const coinsEl = document.getElementById("coins"), winsEl = document.getElementById("wins"), levelEl = document.getElementById("level"), xpBar = document.getElementById("xpBar");
+
+  function authBody(extra={}){return {initData: tg ? tg.initData : "", dev_user_id: localStorage.getItem("dev_user_id") || "dev_user", ...extra};}
+  async function api(path, body={}){
+    const res = await fetch(API_BASE + path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(authBody(body))});
+    const data = await res.json();
+    if(!res.ok || data.ok === false) throw new Error(data.error || "server error");
+    return data;
+  }
+  function setStats(data){if(data.user) me=data.user; coinsEl.textContent=me.coins; winsEl.textContent=me.wins; levelEl.textContent=me.level; xpBar.style.width=((me.coins%1000)/1000*100)+"%";}
+  function haptic(type){try{if(tg&&tg.HapticFeedback){if(type==="win")tg.HapticFeedback.notificationOccurred("success");else if(type==="lose")tg.HapticFeedback.notificationOccurred("error");else tg.HapticFeedback.impactOccurred("medium");}}catch(e){}}
+  function sendToBot(payload){if(tg)tg.sendData(JSON.stringify(payload));else alert("Открой через Telegram Mini App");}
+  function openGame(id){screens.forEach(s=>document.getElementById(s).style.display="none");document.getElementById(id).style.display="block";if(id==="profile")updateProfile();if(id==="leader")loadLeaderboard();}
+  function back(){openGame("menu");}
+
+  document.getElementById("openRocket").onclick=()=>openGame("rocket");
+  document.getElementById("openMines").onclick=()=>openGame("mines");
+  document.getElementById("shopBtn").onclick=()=>openGame("shop");
+  document.getElementById("giftBtn").onclick=()=>openGame("gift");
+  document.getElementById("leaderBtn").onclick=()=>openGame("leader");
+  document.getElementById("profileBtn").onclick=()=>openGame("profile");
+  document.querySelectorAll(".backBtn").forEach(btn=>btn.onclick=back);
+
+  document.getElementById("dailyBtn").onclick=async()=>{try{const data=await api("/api/daily");setStats(data);alert("🎁 Бонус +"+data.reward);haptic("win");}catch(e){alert(e.message)}};
+  ["buy1","buy5","buy10"].forEach(id=>{document.getElementById(id).onclick=()=>{const stars=id==="buy1"?1:id==="buy5"?5:10;sendToBot({action:"buy",stars});document.getElementById("shopRes").textContent="⭐ Запрос отправлен боту";};});
+  document.getElementById("giftRequest").onclick=async()=>{const res=document.getElementById("giftRes");try{const data=await api("/api/gift/request");setStats(data);res.textContent="🎁 Заявка #"+data.gift_id+" отправлена админу";haptic("win");}catch(e){res.textContent="❌ "+e.message;}};
+
+  function renderHistory(){const box=document.getElementById("rocketHistory");box.innerHTML="";rocketHistory.slice(0,10).forEach(x=>{const el=document.createElement("div");el.className="hist";el.textContent="x"+Number(x).toFixed(2);if(x<1.8)el.style.color="#ef4444";if(x>=2.5)el.style.color="#22c55e";box.appendChild(el);});}
+  document.getElementById("startRocket").onclick=async()=>{if(rocketTimer)return;const bet=Number(document.getElementById("rocketBet").value), autoCash=Number(document.getElementById("autoCash").value), res=document.getElementById("rocketRes");try{const data=await api("/api/rocket/start",{bet});setStats(data);rocketSession=data.session_id;rocketMult=1;visualProgress=0;document.getElementById("rocketMulti").textContent="x1.00";document.getElementById("rocketMulti").style.color="#22c55e";document.getElementById("rocketBar").style.width="0%";res.textContent="🚀 Полетели!";haptic("tap");rocketTimer=setInterval(async()=>{rocketMult+=0.035+rocketMult*0.006;document.getElementById("rocketMulti").textContent="x"+rocketMult.toFixed(2);visualProgress+=1.4+Math.random()*1.4;if(visualProgress>96)visualProgress=18+Math.random()*18;document.getElementById("rocketBar").style.width=visualProgress+"%";if(autoCash&&rocketMult>=autoCash){document.getElementById("cashRocket").click();return;}try{const st=await api("/api/rocket/status",{session_id:rocketSession});if(st.status==="lost"){clearInterval(rocketTimer);rocketTimer=null;document.getElementById("rocketMulti").style.color="#ef4444";document.getElementById("rocketBar").style.width="100%";res.textContent="💥 Краш на x"+st.crash.toFixed(2);rocketHistory.unshift(st.crash);rocketHistory=rocketHistory.slice(0,10);localStorage.setItem("zl_history",JSON.stringify(rocketHistory));renderHistory();setStats(st);haptic("lose");}}catch(e){}},180);}catch(e){res.textContent="❌ "+e.message;}};
+  document.getElementById("cashRocket").onclick=async()=>{const res=document.getElementById("rocketRes");if(!rocketSession){res.textContent="Сначала запусти ракету";return;}try{const data=await api("/api/rocket/cashout",{session_id:rocketSession});if(rocketTimer){clearInterval(rocketTimer);rocketTimer=null;}rocketSession=null;setStats(data);if(data.status==="lost"){document.getElementById("rocketMulti").style.color="#ef4444";res.textContent="💥 Краш на x"+data.crash.toFixed(2);rocketHistory.unshift(data.crash);haptic("lose");}else{res.textContent="✅ Забрал +"+data.win+" на x"+data.multiplier.toFixed(2);rocketHistory.unshift(data.multiplier);haptic("win");}rocketHistory=rocketHistory.slice(0,10);localStorage.setItem("zl_history",JSON.stringify(rocketHistory));renderHistory();}catch(e){res.textContent="❌ "+e.message;}};
+
+  document.getElementById("startMines").onclick=async()=>{const bet=Number(document.getElementById("mineBet").value), mines=Number(document.getElementById("mineCount").value), res=document.getElementById("mineRes");try{const data=await api("/api/mines/start",{bet,mines});setStats(data);mineSession=data.session_id;const grid=document.getElementById("mineGrid");grid.innerHTML="";for(let i=0;i<25;i++){const btn=document.createElement("button");btn.type="button";btn.textContent="❓";btn.className="blue";btn.onclick=()=>openMine(i,btn);grid.appendChild(btn);}res.textContent="Открывай клетки";haptic("tap");}catch(e){res.textContent="❌ "+e.message;}};
+  async function openMine(i,btn){const res=document.getElementById("mineRes");if(!mineSession||btn.textContent!=="❓")return;try{const data=await api("/api/mines/open",{session_id:mineSession,cell:i});setStats(data);if(data.status==="lost"){btn.textContent="💣";btn.className="red";revealBombs(data.bombs||[]);mineSession=null;res.textContent="💥 Проигрыш";haptic("lose");return;}btn.textContent="💎";btn.className="green";res.textContent="Можно забрать x"+data.multiplier.toFixed(2);haptic("tap");}catch(e){res.textContent="❌ "+e.message;}}
+  function revealBombs(bombs){const buttons=document.querySelectorAll("#mineGrid button");bombs.forEach(i=>{if(buttons[i]){buttons[i].textContent="💣";buttons[i].className="red";}});}
+  document.getElementById("cashMines").onclick=async()=>{const res=document.getElementById("mineRes");if(!mineSession){res.textContent="Сначала начни игру";return;}try{const data=await api("/api/mines/cashout",{session_id:mineSession});mineSession=null;setStats(data);res.textContent="✅ Забрал +"+data.win+" на x"+data.multiplier.toFixed(2);haptic("win");}catch(e){res.textContent="❌ "+e.message;}};
+
+  async function loadLeaderboard(){const box=document.getElementById("leaderList");box.innerHTML="Загрузка...";try{const data=await api("/api/leaderboard");box.innerHTML="";data.items.forEach((u,i)=>{const row=document.createElement("div");row.className="leader-row";row.innerHTML="<span>#"+(i+1)+" user "+u.user_id+"</span><b>"+u.coins+" 💰</b>";box.appendChild(row);});}catch(e){box.textContent="❌ "+e.message;}}
+  function updateProfile(){document.getElementById("profileText").innerHTML="💰 Очки: "+me.coins+"<br>⭐ Уровень: "+me.level+"<br>🏆 Победы: "+me.wins+"<br>🎮 Игр сыграно: "+me.games+"<br>🎁 Бонусов получено: "+me.bonus_total;}
+
+  async function init(){try{const data=await api("/api/me");setStats(data);renderHistory();}catch(e){alert("Сервер недоступен: "+e.message);}}
+  init();
+});
+</script>
+</body>
+</html>
