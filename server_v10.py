@@ -331,8 +331,5 @@ def main():
     application.run_polling()
 
 
-if name == "__main__":
-    main()
-
 if __name__ == "__main__":
     main()
