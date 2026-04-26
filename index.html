@@ -161,6 +161,29 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("giftRequest").onclick=async()=>{const res=document.getElementById("giftRes");try{const data=await api("/api/gift/request");setStats(data);res.textContent="🎁 Заявка #"+data.gift_id+" отправлена админу";haptic("win");}catch(e){res.textContent="❌ "+e.message;}};
 
   function renderHistory(){const box=document.getElementById("rocketHistory");box.innerHTML="";rocketHistory.slice(0,10).forEach(x=>{const el=document.createElement("div");el.className="hist";el.textContent="x"+Number(x).toFixed(2);if(x<1.8)el.style.color="#ef4444";if(x>=2.5)el.style.color="#22c55e";box.appendChild(el);});}
+  
+  clearInterval(rocketTimer);
+  rocketTimer = null;
+  rocketSession = null;
+
+  document.getElementById("rocketMulti").style.color = "#ef4444";
+  document.getElementById("rocketBar").style.width = "100%";
+  if(st.status==="lost"){
+  clearInterval(rocketTimer);
+  rocketTimer = null;
+  rocketSession = null;
+
+  document.getElementById("rocketMulti").style.color = "#ef4444";
+  document.getElementById("rocketBar").style.width = "100%";
+  res.textContent = "💥 Краш на x"+st.crash.toFixed(2);
+
+  rocketHistory.unshift(st.crash);
+  rocketHistory = rocketHistory.slice(0,10);
+  localStorage.setItem("zl_history",JSON.stringify(rocketHistory));
+  renderHistory();
+  setStats(st);
+  haptic("lose");
+}
   document.getElementById("startRocket").onclick=async()=>{if(rocketTimer)return;const bet=Number(document.getElementById("rocketBet").value), autoCash=Number(document.getElementById("autoCash").value), res=document.getElementById("rocketRes");try{const data=await api("/api/rocket/start",{bet});setStats(data);rocketSession=data.session_id;rocketMult=1;visualProgress=0;document.getElementById("rocketMulti").textContent="x1.00";document.getElementById("rocketMulti").style.color="#22c55e";document.getElementById("rocketBar").style.width="0%";res.textContent="🚀 Полетели!";haptic("tap");rocketTimer=setInterval(async()=>{rocketMult+=0.035+rocketMult*0.006;document.getElementById("rocketMulti").textContent="x"+rocketMult.toFixed(2);visualProgress+=1.4+Math.random()*1.4;if(visualProgress>96)visualProgress=18+Math.random()*18;document.getElementById("rocketBar").style.width=visualProgress+"%";if(autoCash&&rocketMult>=autoCash){document.getElementById("cashRocket").click();return;}try{const st=await api("/api/rocket/status",{session_id:rocketSession});if(st.status==="lost"){clearInterval(rocketTimer);rocketTimer=null;document.getElementById("rocketMulti").style.color="#ef4444";document.getElementById("rocketBar").style.width="100%";res.textContent="💥 Краш на x"+st.crash.toFixed(2);rocketHistory.unshift(st.crash);rocketHistory=rocketHistory.slice(0,10);localStorage.setItem("zl_history",JSON.stringify(rocketHistory));renderHistory();setStats(st);haptic("lose");}}catch(e){}},180);}catch(e){res.textContent="❌ "+e.message;}};
   document.getElementById("cashRocket").onclick=async()=>{const res=document.getElementById("rocketRes");if(!rocketSession){res.textContent="Сначала запусти ракету";return;}try{const data=await api("/api/rocket/cashout",{session_id:rocketSession});if(rocketTimer){clearInterval(rocketTimer);rocketTimer=null;}rocketSession=null;setStats(data);if(data.status==="lost"){document.getElementById("rocketMulti").style.color="#ef4444";res.textContent="💥 Краш на x"+data.crash.toFixed(2);rocketHistory.unshift(data.crash);haptic("lose");}else{res.textContent="✅ Забрал +"+data.win+" на x"+data.multiplier.toFixed(2);rocketHistory.unshift(data.multiplier);haptic("win");}rocketHistory=rocketHistory.slice(0,10);localStorage.setItem("zl_history",JSON.stringify(rocketHistory));renderHistory();}catch(e){res.textContent="❌ "+e.message;}};
 
