@@ -295,29 +295,41 @@ async def admin_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         con=db(); con.execute("UPDATE gifts SET status='done' WHERE id=?", (gid,)); con.commit(); con.close()
         await q.message.reply_text(f"✅ Заявка #{gid} закрыта.")
 
-def run_flask():
-    app.run(host="0.0.0.0", port=PORT)
+def run_bot():
+    print("🤖 BOT THREAD STARTING...", flush=True)
 
-def main():
-    # запускаем Flask
-    threading.Thread(target=run_flask).start()
-
-    # запускаем бота
     application = ApplicationBuilder().token(TOKEN).build()
 
-    print("🚀 Bot starting...")
-    application.run_polling()
-    init_db()
-    threading.Thread(target=run_flask).start()
-    application=ApplicationBuilder().token(TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("gifts", admin_gifts))
     application.add_handler(CallbackQueryHandler(admin_button))
     application.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, webapp_data))
     application.add_handler(PreCheckoutQueryHandler(precheckout))
     application.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, paid))
-    print("ZeroLuck v10 started")
+
+    print("✅ BOT POLLING STARTED", flush=True)
     application.run_polling(close_loop=False)
 
-if __name__=="__main__":
+
+def main():
+    if not TOKEN:
+        raise RuntimeError("TELEGRAM_TOKEN не найден")
+
+    init_db()
+
+    # бот запускаем отдельным потоком
+    threading.Thread(target=run_bot, daemon=True).start()
+
+    print("🌐 FLASK SERVER STARTING...", flush=True)
+
+    # Flask держит Render живым
+    app.run(
+        host="0.0.0.0",
+        port=PORT,
+        debug=False,
+        use_reloader=False
+    )
+
+
+if name == "__main__":
     main()
