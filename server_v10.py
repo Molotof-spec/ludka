@@ -127,7 +127,7 @@ async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "/give 123456789 10000\n\n"
             "Себе:\n"
             "/give me 10000"
-    )
+        )
     if q.data == "admin_stats":
         users = con.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
         gifts = con.execute("SELECT COUNT(*) AS c FROM gifts WHERE status='pending'").fetchone()["c"]
