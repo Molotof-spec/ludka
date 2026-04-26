@@ -303,7 +303,8 @@ async def admin_gifts(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text += f"#{r['id']} | user {r['user_id']} | cost {r['cost']}\n"
         kb.append([InlineKeyboardButton(f"✅ Закрыть #{r['id']}", callback_data=f"gift_done:{r['id']}")])
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(kb))
-
+async def myid(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(f"Твой ID: {update.effective_user.id}")
 async def admin_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q=update.callback_query
     await q.answer()
