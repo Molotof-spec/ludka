@@ -102,6 +102,7 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("📊 Статистика", callback_data="admin_stats")],
         [InlineKeyboardButton("🎁 Заявки подарков", callback_data="admin_gifts")],
         [InlineKeyboardButton("🏆 Топ игроков", callback_data="admin_top")],
+        [InlineKeyboardButton("💰 Выдать очки", callback_data="admin_add_info")],
     ]
 
     await update.message.reply_text(
@@ -113,12 +114,20 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
-
+    
     if ADMIN_ID and q.from_user.id != ADMIN_ID:
         return
 
     con = db()
-
+    elif q.data == "admin_add_info":
+    await q.message.reply_text(
+        "💰 Чтобы выдать очки, напиши:\n\n"
+        "/give USER_ID AMOUNT\n\n"
+        "Пример:\n"
+        "/give 123456789 10000\n\n"
+        "Себе:\n"
+        "/give me 10000"
+    )
     if q.data == "admin_stats":
         users = con.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
         gifts = con.execute("SELECT COUNT(*) AS c FROM gifts WHERE status='pending'").fetchone()["c"]
