@@ -120,13 +120,13 @@ async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     con = db()
     elif q.data == "admin_add_info":
-    await q.message.reply_text(
-        "💰 Чтобы выдать очки, напиши:\n\n"
-        "/give USER_ID AMOUNT\n\n"
-        "Пример:\n"
-        "/give 123456789 10000\n\n"
-        "Себе:\n"
-        "/give me 10000"
+        await q.message.reply_text(
+            "💰 Чтобы выдать очки, напиши:\n\n"
+            "/give USER_ID AMOUNT\n\n"
+            "Пример:\n"
+            "/give 123456789 10000\n\n"
+            "Себе:\n"
+            "/give me 10000"
     )
     if q.data == "admin_stats":
         users = con.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
